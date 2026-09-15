@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALL Informática | Serviços e Ordens de Serviço</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#168cff">
+    <style>
+        .os-page { padding-top: 5px; }
+        .os-empty {
+            text-align: center;
+            padding: 70px 20px;
+            color: #8b949e;
+        }
+        .os-empty-icon { font-size: 46px; margin-bottom: 15px; }
+        .os-empty h3 { color: #fff; margin-bottom: 8px; font-size: 21px; }
+        .os-empty p { margin-bottom: 22px; }
+        .os-actions { display:flex; gap:10px; flex-wrap:wrap; }
+        .os-table-wrap { overflow-x:auto; }
+        .status-os { padding:5px 10px; border-radius:20px; font-size:11px; font-weight:bold; background:rgba(22,140,255,.12); color:#168cff; }
+        .status-os.pronto { background:rgba(40,200,100,.12); color:#45e58a; }
+        .status-os.andamento { background:rgba(255,193,7,.12); color:#ffc107; }
+        .os-action-buttons { display:flex; gap:6px; flex-wrap:wrap; }
+        .os-action-buttons .btn { padding:7px 9px; font-size:12px; }
+        .btn-success { background:#168f4d; color:#fff; border:1px solid #168f4d; }
+        .btn-success:hover { background:#1baa5d; }
+        .btn-whatsapp { background:#159447; color:#fff; border:1px solid #159447; text-decoration:none; }
+        .btn-whatsapp:hover { background:#1ab35a; }
+        .os-view-content { max-width:900px; max-height:92vh; overflow-y:auto; }
+        .os-view-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+        .os-info-box { background:#0d1116; border:1px solid #252d35; border-radius:8px; padding:12px; }
+        .os-info-box small { display:block; color:#7f8993; margin-bottom:5px; font-size:11px; }
+        .os-info-box strong, .os-info-box span { color:#fff; font-size:13px; }
+        .os-view-full { grid-column:1/-1; }
+        .os-view-list { margin:8px 0 0; padding-left:18px; color:#cbd1d7; font-size:13px; line-height:1.7; }
+        .os-check-ok { color:#45e58a; }
+        .os-check-defeito { color:#ff6b6b; font-weight:bold; }
+        .os-check-nao-testado { color:#ffc107; }
+        @media (max-width:700px){ .os-view-grid{grid-template-columns:1fr;} .os-view-full{grid-column:auto;} }
+    
+        .os-checklist-hidden { display:none; }
+        .os-price-box { display:flex; gap:10px; align-items:end; }
+        .os-price-box .form-group { flex:1; }
+        .os-budget-note { margin-top:10px; padding:10px 12px; border-radius:8px; background:rgba(255,193,7,.08); border:1px solid rgba(255,193,7,.22); color:#ffc107; font-size:12px; }
+        .status-os.aprovacao { background:rgba(255,193,7,.12); color:#ffc107; }
+        .btn-warning { background:#b8860b; color:#fff; border:none; }
+        .btn-warning:hover { filter:brightness(1.08); }
+.services-dashboard-cards{grid-template-columns:repeat(4,minmax(0,1fr));}.os-periodo-filtros{margin:18px 0;display:flex;gap:8px;flex-wrap:wrap}.filtro-os.ativo{background:#168cff!important;color:#fff!important}@media(max-width:1000px){.services-dashboard-cards{grid-template-columns:repeat(2,minmax(0,1fr));}}@media(max-width:650px){.services-dashboard-cards{grid-template-columns:1fr;}}</style>
+</head>
+<body>
+<button class="mobile-menu-toggle" type="button" aria-label="Abrir menu" onclick="document.body.classList.toggle('menu-mobile-aberto')">☰</button>
+<div class="mobile-menu-overlay" onclick="document.body.classList.remove('menu-mobile-aberto')"></div>
+<div class="app">
+    <aside class="sidebar">
+<div class="logo"><img src="logo-all.png" alt="ALL Tecnologia | Confiança | Soluções"></div>
+<div class="menu">
+<div class="menu-title">Menu</div>
+<a class="menu-link" href="index.html">📊 Dashboard</a>
+<a class="menu-link" href="index.html#produtos">📦 Produtos</a>
+<a class="menu-link" href="vendas.html">🛒 Vendas</a>
+<a class="menu-link" href="servicos.html" style="background:#168cff;color:white;">🛠️ Serviços / OS</a>
+<a class="menu-link" href="sync.html">☁️ Sincronização</a>
+<a class="menu-link" href="vendas.html#historico">📈 Histórico de vendas</a>
+<div class="menu-title">Estoque</div>
+<a class="menu-link" href="index.html#entrada-estoque">📥 Entrada de estoque</a>
+<a class="menu-link" href="index.html#estoque-baixo">⚠️ Estoque baixo</a>
+<a class="menu-link" href="index.html#todos-produtos">📋 Todos os produtos</a>
+</div></aside>
+
+    <main class="main">
+        <div class="topbar">
+            <div>
+                <h2>Serviços / Ordens de serviço</h2>
+                <span>Dashboard e gestão dos serviços — ALL Informática</span>
+            </div>
+            <div class="topbar-actions">
+                <button class="btn btn-primary" onclick="novaOS()">+ Nova ordem de serviço</button>
+                <a class="btn" href="index.html" style="text-decoration:none;color:white;">📦 Estoque</a>
+            </div>
+        </div>
+
+        <div class="cards services-dashboard-cards">
+            <div class="card"><div class="card-title">OS no período</div><div class="card-value blue" id="osTotalPeriodo">0</div></div>
+            <div class="card"><div class="card-title">Faturamento previsto</div><div class="card-value green" id="osFaturamentoPeriodo">R$ 0,00</div></div>
+            <div class="card"><div class="card-title">Aguardando aprovação</div><div class="card-value" id="osAguardandoAprovacao">0</div></div>
+            <div class="card"><div class="card-title">Em andamento</div><div class="card-value" id="osAndamento">0</div></div>
+            <div class="card"><div class="card-title">Prontas para retirada</div><div class="card-value blue" id="osProntas">0</div></div>
+            <div class="card"><div class="card-title">Concluídas</div><div class="card-value green" id="osConcluidas">0</div></div>
+            <div class="card"><div class="card-title">Ticket médio</div><div class="card-value" id="osTicketMedio">R$ 0,00</div></div>
+        </div>
+        <div class="historico-filtros os-periodo-filtros">
+            <button class="btn btn-primary filtro-os ativo" onclick="filtrarDashboardOS('dia', this)">Hoje</button>
+            <button class="btn filtro-os" onclick="filtrarDashboardOS('semana', this)">Esta semana</button>
+            <button class="btn filtro-os" onclick="filtrarDashboardOS('mes', this)">Este mês</button>
+            <button class="btn filtro-os" onclick="filtrarDashboardOS('todas', this)">Todas</button>
+        </div>
+
+        <section class="section os-page">
+            <div class="section-header">
+                <div>
+                    <h3>Ordens de serviço</h3>
+                    <span class="section-subtitle">Aqui ficarão os atendimentos dos clientes e aparelhos.</span>
+                </div>
+                <div class="os-actions">
+                    <input id="buscaOS" type="text" placeholder="🔎 Buscar OS, cliente ou aparelho..." oninput="renderizarOS()" style="background:#0b0d10;border:1px solid #303942;color:white;padding:10px 12px;border-radius:7px;outline:none;min-width:280px;">
+                </div>
+            </div>
+
+            <div class="os-table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>OS</th>
+                            <th>Cliente</th>
+                            <th>Aparelho</th>
+                            <th>Problema</th>
+                            <th>Status</th>
+                            <th>Data</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaOS">
+                        <tr><td colspan="7" class="historico-sem-resultados">Nenhuma ordem de serviço cadastrada.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<div class="modal" id="modalOS">
+    <div class="modal-content modal-os-content">
+        <div class="modal-header">
+            <div>
+                <h3>Nova ordem de serviço</h3>
+                <span class="section-subtitle">Registre tudo que foi entregue e o estado do aparelho na entrada.</span>
+            </div>
+            <span class="close" onclick="fecharOS()">×</span>
+        </div>
+
+        <form id="formOS">
+            <div class="os-form-section">
+                <div class="os-section-title">👤 Dados do cliente e aparelho</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Cliente</label>
+                        <input id="osCliente" required placeholder="Nome do cliente">
+                    </div>
+                    <div class="form-group">
+                        <label>Telefone</label>
+                        <input id="osTelefone" placeholder="WhatsApp / telefone">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de aparelho</label>
+                        <select id="osTipoAparelho" required onchange="atualizarChecklistPorTipo()">
+                            <option value="Celular">📱 Celular</option>
+                            <option value="Tablet">📱 Tablet</option>
+                            <option value="Computador">🖥️ Computador</option>
+                            <option value="Notebook">💻 Notebook</option>
+                            <option value="Outro">🔧 Outro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Aparelho</label>
+                        <input id="osAparelho" required placeholder="Ex.: iPhone 13 / Acer Nitro 5">
+                    </div>
+                    <div class="form-group">
+                        <label>IMEI / Nº de série</label>
+                        <input id="osIdentificacao" placeholder="Opcional">
+                    </div>
+                    <div class="form-group full">
+                        <label>Problema relatado pelo cliente</label>
+                        <textarea id="osProblema" required placeholder="Descreva exatamente o que o cliente informou..." rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="os-form-section">
+                <div class="os-section-title">💰 Valor do serviço / orçamento</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Tipo de cobrança</label>
+                        <select id="osTipoValor" onchange="atualizarTipoValor()">
+                            <option value="valor">💵 Serviço com valor definido</option>
+                            <option value="orcamento">📋 Orçamento para aprovação</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label id="labelValorOS">Valor do serviço (R$)</label>
+                        <input id="osValor" type="number" min="0" step="0.01" placeholder="0,00">
+                    </div>
+                </div>
+                <div id="avisoOrcamentoOS" class="os-budget-note" style="display:none;">📋 Este atendimento ficará como <strong>Aguardando aprovação</strong>. Você poderá aprovar o orçamento depois.</div>
+            </div>
+
+            <div class="os-form-section">
+                <div class="os-section-title">📦 Acessórios e itens deixados com o aparelho</div>
+                <p class="os-help">Marque tudo que foi entregue junto. Isso ficará registrado na OS.</p>
+                <div class="check-grid">
+                    <label class="check-item"><input type="checkbox" name="osAcessorios" value="Chip / SIM"><span>Chip / SIM</span></label>
+                    <label class="check-item"><input type="checkbox" name="osAcessorios" value="Capinha"><span>Capinha</span></label>
+                    <label class="check-item"><input type="checkbox" name="osAcessorios" value="Carregador"><span>Carregador</span></label>
+                    <label class="check-item"><input type="checkbox" name="osAcessorios" value="Cabo USB"><span>Cabo USB</span></label>
+                    <label class="check-item"><input type="checkbox" name="osAcessorios" value="Fone de ouvido"><span>Fone de ouvido</span></label>
+                    <label class="check-item"><input type="checkbox" name="osAcessorios" value="Cartão de memória"><span>Cartão de memória</span></label>
+                    <label class="check-item"><input type="checkbox" name="osAcessorios" value="Película"><span>Película</span></label>
+                    <label class="check-item"><input type="checkbox" name="osAcessorios" value="Caixa"><span>Caixa</span></label>
+                    <label class="check-item"><input type="checkbox" name="osAcessorios" value="Caneta / S Pen"><span>Caneta / S Pen</span></label>
+                    <label class="check-item"><input type="checkbox" name="osAcessorios" value="Outro acessório"><span>Outro acessório</span></label>
+                </div>
+                <div class="form-group full" style="margin-top:14px;">
+                    <label>Outros acessórios / observações</label>
+                    <input id="osOutrosAcessorios" placeholder="Ex.: suporte, adaptador, chave, cabo específico...">
+                </div>
+            </div>
+
+            <div class="os-form-section" id="secaoChecklistOS">
+                <div class="os-section-title">🔍 Checklist de entrada — condições do aparelho</div>
+                <p class="os-help" id="ajudaChecklistOS">Registre o estado no momento em que o aparelho foi recebido para evitar dúvidas posteriores.</p>
+                <div class="checklist-table-wrap">
+                    <table class="checklist-table">
+                        <thead>
+                            <tr><th>Item verificado</th><th>Estado na entrada</th></tr>
+                        </thead>
+                        <tbody id="checklistOS"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="os-form-section">
+                <div class="os-section-title">📝 Observações adicionais</div>
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label>Observações</label>
+                        <textarea id="osObservacoes" placeholder="Detalhes importantes, riscos, trincas, senha, testes não realizados, etc." rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="os-alert-security">
+                ⚠️ <strong>Importante:</strong> registre o estado físico e funcional do aparelho na entrada. Itens marcados como “Com defeito” ou “Não testado” ficam gravados na ordem de serviço.
+            </div>
+
+            <div class="form-footer">
+                <button type="button" class="btn" onclick="fecharOS()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">✓ Cadastrar OS</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal" id="modalVisualizarOS">
+    <div class="modal-content os-view-content">
+        <div class="modal-header">
+            <div>
+                <h3 id="tituloVisualizarOS">Ordem de serviço</h3>
+                <span class="section-subtitle">Visualização completa do atendimento.</span>
+            </div>
+            <span class="close" onclick="fecharVisualizarOS()">×</span>
+        </div>
+        <div id="conteudoVisualizarOS"></div>
+        <div class="form-footer">
+            <button type="button" class="btn" onclick="fecharVisualizarOS()">Fechar</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="sync.js"></script>
+<script src="auth-guard.js"></script>
+<script>
+let ordensServico = JSON.parse(localStorage.getItem('all_ordens_servico') || '[]');
+
+function salvarOrdensServico() {
+    localStorage.setItem('all_ordens_servico', JSON.stringify(ordensServico));
+    if (window.ALLSync) window.ALLSync.salvarOrdens(ordensServico);
+}
+
+const itensChecklistOS = [
+    'Tela / Display', 'Touchscreen', 'Vidro frontal', 'Tampa traseira', 'Laterais / Moldura',
+    'Câmera traseira', 'Câmera frontal', 'Flash', 'Som / Alto-falante', 'Microfone',
+    'Vibração', 'Botão Power', 'Botões de volume', 'Biometria / Digital', 'Face ID / Reconhecimento facial',
+    'Bateria', 'Conector de carga', 'Carregamento', 'Wi-Fi', 'Bluetooth', 'Sinal / Rede móvel',
+    'Chip / SIM', 'USB / Dados', 'Sensores', 'Lanterna', 'Entrada para fone', 'Carcaça / Estrutura'
+];
+
+function moedaOS(v) {
+    return Number(v || 0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+}
+
+function montarChecklistOS() {
+    const tabela = document.getElementById('checklistOS');
+    tabela.innerHTML = itensChecklistOS.map((item, index) => `
+        <tr>
+            <td><strong>${item}</strong></td>
+            <td>
+                <select name="checklistStatus" class="checklist-select" data-item="${item}">
+                    <option value="OK">✓ OK</option>
+                    <option value="Com defeito">⚠ Com defeito</option>
+                    <option value="Não testado">— Não testado</option>
+                </select>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function atualizarTipoValor() {
+    const tipo = document.getElementById('osTipoValor').value;
+    const campo = document.getElementById('osValor');
+    const label = document.getElementById('labelValorOS');
+    const aviso = document.getElementById('avisoOrcamentoOS');
+
+    if (tipo === 'orcamento') {
+        label.textContent = 'Valor do orçamento (R$)';
+        campo.placeholder = 'Opcional — informe se já houver estimativa';
+        campo.required = false;
+        aviso.style.display = 'block';
+    } else {
+        label.textContent = 'Valor do serviço (R$)';
+        campo.placeholder = '0,00';
+        campo.required = true;
+        aviso.style.display = 'none';
+    }
+}
+
+function atualizarChecklistPorTipo() {
+    const tipo = document.getElementById('osTipoAparelho').value;
+    const secao = document.getElementById('secaoChecklistOS');
+    const ehTelefone = tipo === 'Celular' || tipo === 'Tablet';
+
+    secao.style.display = ehTelefone ? 'block' : 'none';
+
+    if (!ehTelefone) {
+        document.querySelectorAll('select[name="checklistStatus"]').forEach(select => select.value = 'OK');
+    }
+}
+
+function aprovarOrcamento(numero) {
+    const os = ordensServico.find(item => String(item.numero) === String(numero));
+    if (!os) return;
+    if (os.tipoValor !== 'orcamento' || os.status !== 'Aguardando aprovação') return;
+
+    const confirmar = confirm('Aprovar o orçamento da OS #' + os.numero + '?');
+    if (!confirmar) return;
+
+    os.status = 'Em andamento';
+    os.orcamentoAprovadoEm = new Date().toLocaleString('pt-BR');
+    salvarOrdensServico();
+    renderizarOS();
+    visualizarOS(os.numero);
+}
+
+function novaOS() {
+    document.getElementById('formOS').reset();
+    montarChecklistOS();
+    document.getElementById('osTipoAparelho').value = 'Celular';
+    document.getElementById('osTipoValor').value = 'valor';
+    document.getElementById('osValor').value = '';
+    atualizarTipoValor();
+    atualizarChecklistPorTipo();
+    document.getElementById('modalOS').style.display='flex';
+}
+
+function fecharOS() {
+    document.getElementById('modalOS').style.display='none';
+}
+
+function escaparHTML(valor) {
+    return String(valor ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+}
+
+function classeStatusOS(status) {
+    if (status === 'Pronto para retirada' || status === 'Concluída') return 'pronto';
+    if (status === 'Em andamento') return 'andamento';
+    if (status === 'Aguardando aprovação') return 'aprovacao';
+    return '';
+}
+
+function numeroWhatsAppOS(telefone) {
+    let numero = String(telefone || '').replace(/\D/g, '');
+    if (!numero) return '';
+    if (numero.startsWith('55')) return numero;
+    return '55' + numero;
+}
+
+function marcarServicoPronto(numero) {
+    const os = ordensServico.find(item => String(item.numero) === String(numero));
+    if (!os) return;
+
+    if (os.status === 'Pronto para retirada') {
+        alert('Esta ordem de serviço já está marcada como pronta.');
+        return;
+    }
+
+    const confirmar = confirm('Marcar a OS #' + os.numero + ' como "Pronto para retirada"?');
+    if (!confirmar) return;
+
+    os.status = 'Pronto para retirada';
+    os.dataPronto = new Date().toLocaleDateString('pt-BR');
+    os.horaPronto = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+    salvarOrdensServico();
+    renderizarOS();
+    alert('OS #' + os.numero + ' marcada como pronta para retirada.');
+}
+
+function enviarOSWhatsApp(numero) {
+    const os = ordensServico.find(item => String(item.numero) === String(numero));
+    if (!os) return;
+
+    const whatsapp = numeroWhatsAppOS(os.telefone);
+    if (!whatsapp) {
+        alert('Esta OS não possui um número de WhatsApp/telefone cadastrado.');
+        return;
+    }
+
+    const acessorios = Array.isArray(os.acessorios) ? os.acessorios : [];
+    const checklist = Array.isArray(os.checklist) ? os.checklist : [];
+    const defeitos = checklist.filter(item => item.estado === 'Com defeito');
+    const naoTestados = checklist.filter(item => item.estado === 'Não testado');
+    const valorTexto = os.valor !== null && os.valor !== undefined && os.valor !== '' ? moedaOS(os.valor) : 'A definir';
+
+    let mensagem = '📋 *ORDEM DE SERVIÇO — ALL INFORMÁTICA*\n\n' +
+        '*OS:* #' + os.numero + '\n' +
+        '*Data de entrada:* ' + (os.data || '-') + ' às ' + (os.hora || '-') + '\n' +
+        '*Cliente:* ' + (os.cliente || '-') + '\n' +
+        '*Aparelho:* ' + (os.aparelho || '-') + '\n' +
+        '*Tipo:* ' + (os.tipoAparelho || '-') + '\n' +
+        '*IMEI / Nº de série:* ' + (os.identificacao || 'Não informado') + '\n' +
+        '*Problema relatado:* ' + (os.problema || '-') + '\n\n' +
+        '*Serviço / orçamento:* ' + valorTexto + '\n' +
+        '*Status:* ' + (os.status || '-') + '\n';
+
+    if (os.tipoValor === 'orcamento') {
+        mensagem += '\n📌 Este atendimento foi registrado como *orçamento para aprovação*.\n';
+    }
+
+    mensagem += '\n*📦 Itens deixados com o aparelho:*\n';
+    mensagem += acessorios.length ? acessorios.map(item => '• ' + item).join('\n') + '\n' : '• Nenhum acessório registrado\n';
+    if (os.outrosAcessorios) mensagem += '• ' + os.outrosAcessorios + '\n';
+
+    if (checklist.length) {
+        mensagem += '\n*🔍 Condições registradas na entrada:*\n';
+        mensagem += checklist.map(item => {
+            const simbolo = item.estado === 'OK' ? '✓' : item.estado === 'Com defeito' ? '⚠️' : '—';
+            return simbolo + ' ' + item.item + ': ' + item.estado;
+        }).join('\n') + '\n';
+    }
+
+    if (defeitos.length) {
+        mensagem += '\n⚠️ *Defeitos já registrados na entrada:*\n' + defeitos.map(item => '• ' + item.item).join('\n') + '\n';
+    }
+    if (naoTestados.length) {
+        mensagem += '\nℹ️ Itens não testados na entrada: ' + naoTestados.length + '\n';
+    }
+
+    if (os.observacoes) {
+        mensagem += '\n*📝 Observações:*\n' + os.observacoes + '\n';
+    }
+
+    mensagem += '\n⚠️ *Guarde esta mensagem como comprovante digital da ordem de serviço.*\n\n' +
+        'Obrigado pela preferência!\n*ALL Informática*';
+
+    window.open('https://wa.me/' + whatsapp + '?text=' + encodeURIComponent(mensagem), '_blank');
+}
+
+function chamarClienteWhatsApp(numero) {
+    const os = ordensServico.find(item => String(item.numero) === String(numero));
+    if (!os) return;
+
+    const whatsapp = numeroWhatsAppOS(os.telefone);
+    if (!whatsapp) {
+        alert('Esta OS não possui um número de WhatsApp/telefone cadastrado.');
+        return;
+    }
+
+    if (os.status !== 'Pronto para retirada' && os.status !== 'Concluída') {
+        const confirmar = confirm('O serviço ainda não está marcado como pronto. Deseja marcar como pronto e chamar o cliente no WhatsApp?');
+        if (!confirmar) return;
+        os.status = 'Pronto para retirada';
+        os.dataPronto = new Date().toLocaleDateString('pt-BR');
+        os.horaPronto = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+        salvarOrdensServico();
+        renderizarOS();
+    }
+
+    const mensagem = 'Olá, ' + os.cliente + '! 👋\n\n' +
+        'Aqui é da ALL Informática.\n\n' +
+        'Seu aparelho referente à OS #' + os.numero + ' está pronto para retirada. ✅\n\n' +
+        'Aparelho: ' + os.aparelho + '\n\n' +
+        'Obrigado pela preferência!';
+
+    window.open('https://wa.me/' + whatsapp + '?text=' + encodeURIComponent(mensagem), '_blank');
+}
+
+function excluirOS(numero) {
+    const os = ordensServico.find(item => String(item.numero) === String(numero));
+    if (!os) return;
+
+    const confirmar = confirm(
+        'ATENÇÃO!\n\n' +
+        'Você está prestes a excluir a OS #' + os.numero + ' do cliente ' + os.cliente + '.\n\n' +
+        'Esta ação não poderá ser desfeita. Deseja realmente excluir?'
+    );
+    if (!confirmar) return;
+
+    ordensServico = ordensServico.filter(item => String(item.numero) !== String(numero));
+    salvarOrdensServico();
+    fecharVisualizarOS();
+    renderizarOS();
+    alert('Ordem de serviço excluída com sucesso.');
+}
+
+function visualizarOS(numero) {
+    const os = ordensServico.find(item => String(item.numero) === String(numero));
+    if (!os) return;
+
+    const acessorios = Array.isArray(os.acessorios) ? os.acessorios : [];
+    const checklist = Array.isArray(os.checklist) ? os.checklist : [];
+    const defeitos = checklist.filter(item => item.estado === 'Com defeito');
+    const naoTestados = checklist.filter(item => item.estado === 'Não testado');
+    const whatsapp = numeroWhatsAppOS(os.telefone);
+
+    document.getElementById('tituloVisualizarOS').textContent = 'OS #' + os.numero;
+    document.getElementById('conteudoVisualizarOS').innerHTML = `
+        <div class="os-view-grid">
+            <div class="os-info-box"><small>Cliente</small><strong>${escaparHTML(os.cliente)}</strong></div>
+            <div class="os-info-box"><small>Telefone / WhatsApp</small><strong>${escaparHTML(os.telefone || 'Não informado')}</strong></div>
+            <div class="os-info-box"><small>Aparelho</small><strong>${escaparHTML(os.aparelho)}</strong></div>
+            <div class="os-info-box"><small>IMEI / Nº de série</small><strong>${escaparHTML(os.identificacao || 'Não informado')}</strong></div>
+            <div class="os-info-box"><small>Status</small><span class="status-os ${classeStatusOS(os.status)}">${escaparHTML(os.status)}</span></div>
+            <div class="os-info-box"><small>Tipo de aparelho</small><strong>${escaparHTML(os.tipoAparelho || 'Não informado')}</strong></div>
+            <div class="os-info-box"><small>${os.tipoValor === 'orcamento' ? 'Orçamento' : 'Valor do serviço'}</small><strong>${os.valor !== null && os.valor !== undefined && os.valor !== '' ? moedaOS(os.valor) : 'A definir'}</strong></div>
+            ${os.tipoValor === 'orcamento' && os.orcamentoAprovadoEm ? `<div class="os-info-box"><small>Orçamento aprovado</small><strong>${escaparHTML(os.orcamentoAprovadoEm)}</strong></div>` : ''}
+            <div class="os-info-box"><small>Entrada</small><strong>${escaparHTML(os.data || '-')} às ${escaparHTML(os.hora || '-')}</strong></div>
+            ${os.dataPronto ? `<div class="os-info-box"><small>Serviço pronto</small><strong>${escaparHTML(os.dataPronto)} às ${escaparHTML(os.horaPronto || '-')}</strong></div>` : ''}
+            <div class="os-info-box os-view-full"><small>Problema relatado</small><span>${escaparHTML(os.problema || '-')}</span></div>
+            <div class="os-info-box os-view-full"><small>Acessórios / itens deixados</small>
+                ${acessorios.length || os.outrosAcessorios ? `<ul class="os-view-list">${acessorios.map(item => `<li>${escaparHTML(item)}</li>`).join('')}${os.outrosAcessorios ? `<li>${escaparHTML(os.outrosAcessorios)}</li>` : ''}</ul>` : '<span>Nenhum acessório registrado.</span>'}
+            </div>
+            <div class="os-info-box os-view-full"><small>Checklist de entrada</small>
+                ${checklist.length ? `<ul class="os-view-list">${checklist.map(item => `<li class="${item.estado === 'Com defeito' ? 'os-check-defeito' : item.estado === 'Não testado' ? 'os-check-nao-testado' : 'os-check-ok'}"><strong>${escaparHTML(item.item)}:</strong> ${escaparHTML(item.estado)}</li>`).join('')}</ul>` : '<span>Checklist não registrado.</span>'}
+            </div>
+            <div class="os-info-box os-view-full"><small>Resumo de segurança</small><span>${defeitos.length ? '⚠ ' + defeitos.length + ' item(ns) já registrado(s) com defeito na entrada.' : '✓ Nenhum defeito foi marcado no checklist de entrada.'}${naoTestados.length ? ' ' + naoTestados.length + ' item(ns) não foram testados.' : ''}</span></div>
+            <div class="os-info-box os-view-full"><small>Observações</small><span>${escaparHTML(os.observacoes || 'Nenhuma observação.')}</span></div>
+        </div>
+    `;
+
+    const footer = document.querySelector('#modalVisualizarOS .form-footer');
+    footer.innerHTML = `
+        ${os.tipoValor === 'orcamento' && os.status === 'Aguardando aprovação' ? `<button type="button" class="btn btn-warning" onclick="aprovarOrcamento('${escaparHTML(os.numero)}')">✓ Aprovar orçamento</button>` : ''}
+        ${whatsapp ? `<button type="button" class="btn btn-whatsapp" onclick="enviarOSWhatsApp('${escaparHTML(os.numero)}')">📋 Enviar OS pelo WhatsApp</button>` : ''}
+        ${whatsapp ? `<button type="button" class="btn btn-whatsapp" onclick="chamarClienteWhatsApp('${escaparHTML(os.numero)}')">💬 Avisar cliente</button>` : ''}
+        <button type="button" class="btn btn-danger" onclick="excluirOS('${escaparHTML(os.numero)}')">🗑 Excluir OS</button>
+        <button type="button" class="btn" onclick="fecharVisualizarOS()">Fechar</button>
+    `;
+
+    document.getElementById('modalVisualizarOS').style.display = 'flex';
+}
+
+function fecharVisualizarOS() {
+    document.getElementById('modalVisualizarOS').style.display = 'none';
+}
+
+let periodoDashboardOS = 'dia';
+function dataOSObj(os){ const p=String(os.data||'').split('/'); if(p.length===3){const d=new Date(Number(p[2]),Number(p[1])-1,Number(p[0])); d.setHours(0,0,0,0); return d;} return new Date(os.criadoEm || 0); }
+function osNoPeriodo(os, periodo){ const agora=new Date(); agora.setHours(0,0,0,0); const d=dataOSObj(os); if(periodo==='dia') return d.getTime()===agora.getTime(); if(periodo==='semana'){const ini=new Date(agora); const dia=ini.getDay(); ini.setDate(ini.getDate()-(dia===0?6:dia-1)); return d>=ini;} if(periodo==='mes') return d.getFullYear()===agora.getFullYear() && d.getMonth()===agora.getMonth(); return true; }
+function atualizarDashboardOS(){ const lista=ordensServico.filter(os=>osNoPeriodo(os,periodoDashboardOS)); const faturamento=lista.reduce((s,o)=>s+(Number(o.valor)||0),0); const comValor=lista.filter(o=>Number.isFinite(Number(o.valor)) && Number(o.valor)>0); const aprovacao=lista.filter(o=>o.status==='Aguardando aprovação').length; const andamento=lista.filter(o=>o.status==='Em andamento').length; const prontas=lista.filter(o=>o.status==='Pronto para retirada').length; const concluidas=lista.filter(o=>o.status==='Concluída').length; document.getElementById('osTotalPeriodo').textContent=lista.length; document.getElementById('osFaturamentoPeriodo').textContent=moedaOS(faturamento); document.getElementById('osAguardandoAprovacao').textContent=aprovacao; document.getElementById('osAndamento').textContent=andamento; document.getElementById('osProntas').textContent=prontas; document.getElementById('osConcluidas').textContent=concluidas; document.getElementById('osTicketMedio').textContent=moedaOS(comValor.length ? faturamento/comValor.length : 0); }
+function filtrarDashboardOS(periodo, botao){ periodoDashboardOS=periodo; document.querySelectorAll('.filtro-os').forEach(b=>b.classList.remove('ativo','btn-primary')); if(botao) botao.classList.add('ativo','btn-primary'); atualizarDashboardOS(); }
+
+function renderizarOS() {
+    const busca = (document.getElementById('buscaOS')?.value || '').toLowerCase();
+    const lista = ordensServico.filter(os => [os.numero,os.cliente,os.aparelho,os.problema,os.status].join(' ').toLowerCase().includes(busca));
+    document.getElementById('tabelaOS').innerHTML = lista.length ? lista.map(os => `
+        <tr>
+            <td><strong>#${escaparHTML(os.numero)}</strong></td>
+            <td>${escaparHTML(os.cliente)}</td>
+            <td>${escaparHTML(os.aparelho)}</td>
+            <td>${escaparHTML(os.problema)}</td>
+            <td><span class="status-os ${classeStatusOS(os.status)}">${escaparHTML(os.status)}</span></td>
+            <td>${escaparHTML(os.data)}</td>
+            <td>
+                <div class="os-action-buttons">
+                    <button class="btn btn-small" onclick="visualizarOS('${escaparHTML(os.numero)}')">👁 Ver</button>
+                    ${os.tipoValor === 'orcamento' && os.status === 'Aguardando aprovação' ? `<button class="btn btn-warning btn-small" onclick="aprovarOrcamento('${escaparHTML(os.numero)}')">✓ Aprovar</button>` : ''}
+                    ${os.status !== 'Pronto para retirada' && os.status !== 'Concluída' && os.status !== 'Aguardando aprovação' ? `<button class="btn btn-success btn-small" onclick="marcarServicoPronto('${escaparHTML(os.numero)}')">✓ Pronto</button>` : ''}
+                    ${numeroWhatsAppOS(os.telefone) ? `<button class="btn btn-whatsapp btn-small" onclick="enviarOSWhatsApp('${escaparHTML(os.numero)}')">📋 Enviar OS</button>` : ''}
+                    ${numeroWhatsAppOS(os.telefone) ? `<button class="btn btn-whatsapp btn-small" onclick="chamarClienteWhatsApp('${escaparHTML(os.numero)}')">💬 Avisar</button>` : ''}
+                    <button class="btn btn-danger btn-small" onclick="excluirOS('${escaparHTML(os.numero)}')">🗑 Excluir</button>
+                </div>
+            </td>
+        </tr>`).join('') : '<tr><td colspan="7" class="historico-sem-resultados">Nenhuma ordem de serviço encontrada.</td></tr>';
+
+    atualizarDashboardOS();
+}
+
+document.getElementById('formOS').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const acessorios = [...document.querySelectorAll('input[name="osAcessorios"]:checked')].map(el => el.value);
+    const tipoAparelho = document.getElementById('osTipoAparelho').value;
+    const checklistAtivo = tipoAparelho === 'Celular' || tipoAparelho === 'Tablet';
+    const checklist = checklistAtivo ? [...document.querySelectorAll('select[name="checklistStatus"]')].map(select => ({
+        item: select.dataset.item,
+        estado: select.value
+    })) : [];
+    const tipoValor = document.getElementById('osTipoValor').value;
+    const valorCampo = document.getElementById('osValor').value;
+    const valor = valorCampo === '' ? '' : Number(valorCampo);
+
+    if (tipoValor === 'valor' && (valor === '' || !Number.isFinite(valor) || valor < 0)) {
+        alert('Informe um valor válido para o serviço.');
+        return;
+    }
+
+    const os = {
+        numero: String(Date.now()).slice(-6),
+        cliente: document.getElementById('osCliente').value.trim(),
+        telefone: document.getElementById('osTelefone').value.trim(),
+        aparelho: document.getElementById('osAparelho').value.trim(),
+        tipoAparelho,
+        tipoValor,
+        valor,
+        identificacao: document.getElementById('osIdentificacao').value.trim(),
+        problema: document.getElementById('osProblema').value.trim(),
+        acessorios,
+        outrosAcessorios: document.getElementById('osOutrosAcessorios').value.trim(),
+        checklist,
+        observacoes: document.getElementById('osObservacoes').value.trim(),
+        status: tipoValor === 'orcamento' ? 'Aguardando aprovação' : 'Aberta',
+        data: new Date().toLocaleDateString('pt-BR'),
+        hora: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})
+    };
+
+    ordensServico.unshift(os);
+    salvarOrdensServico();
+    this.reset();
+    fecharOS();
+    renderizarOS();
+
+    const defeitos = checklist.filter(item => item.estado === 'Com defeito').map(item => item.item);
+    const enviarAgora = os.telefone ? confirm(
+        'Ordem de serviço cadastrada com sucesso!\n\n' +
+        'OS: #' + os.numero +
+        '\nStatus: ' + os.status +
+        '\nValor: ' + (os.valor !== '' ? moedaOS(os.valor) : 'A definir') +
+        (defeitos.length ? '\n\nItens registrados com defeito:\n• ' + defeitos.join('\n• ') : '') +
+        '\n\nDeseja enviar a ordem de serviço completa para o cliente pelo WhatsApp agora?'
+    ) : false;
+
+    if (enviarAgora) enviarOSWhatsApp(os.numero);
+});
+
+montarChecklistOS();
+renderizarOS();
+
+window.addEventListener('load', function () {
+    if (!window.ALLSync) return;
+    ALLSync.init({
+        aplicar: async function (dados) {
+            // Quando a nuvem já possui dados, ela é a fonte principal.
+            // Se estiver totalmente vazia, preservamos o local para o primeiro envio.
+            if (dados.temDadosNuvem && Array.isArray(dados.ordens)) {
+                ordensServico = dados.ordens;
+                localStorage.setItem('all_ordens_servico', JSON.stringify(ordensServico));
+                renderizarOS();
+            }
+        }
+    });
+});
+</script>
+<script>
+window.addEventListener('all:sync', function(event) {
+    if (event.detail?.tipo === 'ordens') {
+        ordensServico = event.detail.dados || [];
+        localStorage.setItem('all_ordens_servico', JSON.stringify(ordensServico));
+        renderizarOS();
+    }
+});
+</script>
+<script>if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {})); }</script>
+</body>
+</html>

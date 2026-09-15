@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ALL Informática | Sincronização</title><link rel="stylesheet" href="style.css"><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#168cff"><style>.sync-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.sync-box{padding:18px;border:1px solid #26313a;border-radius:12px;background:#11171d}.sync-box h3{margin:0 0 8px}.sync-box p{font-size:12px;color:#8d98a3;line-height:1.5}.sync-status{font-size:13px;color:#fff}.sync-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}@media(max-width:800px){.sync-grid{grid-template-columns:1fr}}</style></head>
+<body><button class="mobile-menu-toggle" type="button" onclick="document.body.classList.toggle('menu-mobile-aberto')">☰</button><div class="mobile-menu-overlay" onclick="document.body.classList.remove('menu-mobile-aberto')"></div><div class="app"><aside class="sidebar">
+<div class="logo"><img src="logo-all.png" alt="ALL Tecnologia | Confiança | Soluções"></div>
+<div class="menu">
+<div class="menu-title">Menu</div>
+<a class="menu-link" href="index.html">📊 Dashboard</a>
+<a class="menu-link" href="index.html#produtos">📦 Produtos</a>
+<a class="menu-link" href="vendas.html">🛒 Vendas</a>
+<a class="menu-link" href="servicos.html">🛠️ Serviços / OS</a>
+<a class="menu-link" href="sync.html" style="background:#168cff;color:white;">☁️ Sincronização</a>
+<a class="menu-link" href="vendas.html#historico">📈 Histórico de vendas</a>
+<div class="menu-title">Estoque</div>
+<a class="menu-link" href="index.html#entrada-estoque">📥 Entrada de estoque</a>
+<a class="menu-link" href="index.html#estoque-baixo">⚠️ Estoque baixo</a>
+<a class="menu-link" href="index.html#todos-produtos">📋 Todos os produtos</a>
+</div></aside><main class="main"><div class="topbar"><div><h2>Sincronização</h2><span>Dados compartilhados entre computador, celular e tablet.</span></div><div class="topbar-actions"><button class="btn" onclick="ALLSync.logout().then(()=>location.href='login.html')">Sair</button></div></div><section class="section"><div class="sync-grid"><div class="sync-box"><h3>☁️ Conta</h3><p>Usuário conectado ao banco online.</p><div class="sync-status" id="statusConta">Verificando...</div></div><div class="sync-box"><h3>💻 Dados locais</h3><p>O que está salvo atualmente neste aparelho.</p><div class="sync-status" id="statusLocal">-</div></div><div class="sync-box"><h3>🌐 Banco online</h3><p>Registros disponíveis para outros aparelhos.</p><div class="sync-status" id="statusNuvem">-</div></div></div><div class="sync-actions"><button class="btn btn-primary" onclick="enviar()">☁️ Enviar este aparelho para a nuvem</button><button class="btn" onclick="baixar()">⬇️ Baixar da nuvem para este aparelho</button></div><div class="section" style="margin-top:20px"><h3>Como usar</h3><p class="section-subtitle">Primeiro faça o login, depois envie os dados do computador que já está preenchido. Nos demais aparelhos, faça login e use o sistema normalmente.</p></div></section></main></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script src="sync.js"></script><script src="auth-guard.js"></script><script>
+async function atualizar(){const p=JSON.parse(localStorage.getItem('all_produtos')||'[]'),v=JSON.parse(localStorage.getItem('all_vendas')||'[]'),o=JSON.parse(localStorage.getItem('all_ordens_servico')||'[]');document.getElementById('statusLocal').textContent=`${p.length} produtos • ${v.length} vendas • ${o.length} OS`;try{const sessao=await ALLSync.usuarioAtual();const i=ALLSync.info();document.getElementById('statusConta').textContent=i.email||sessao?.user?.email||'Não conectado';if(!sessao){document.getElementById('statusNuvem').textContent='Faça login para consultar';return;}const d=await ALLSync.carregarNuvem();document.getElementById('statusNuvem').textContent=`${(d.produtos||[]).length} produtos • ${(d.vendas||[]).length} vendas • ${(d.ordens||[]).length} OS`;}catch(e){console.error('ALL Sync status:',e);document.getElementById('statusNuvem').textContent='Erro ao consultar';}}
+async function enviar(){try{const r=await ALLSync.sincronizarTudoLocal();alert(`Enviado!\n${r.produtos} produtos\n${r.vendas} vendas\n${r.ordens} OS`);atualizar();}catch(e){alert(e.message||e);}}
+async function baixar(){if(!confirm('Isso substituirá os dados locais deste aparelho pelos dados da nuvem. Continuar?'))return;try{await ALLSync.baixarNuvemParaLocal();alert('Dados baixados com sucesso. Recarregue a página para atualizar as telas.');atualizar();}catch(e){alert(e.message||e);}}
+atualizar();
+</script></body></html>

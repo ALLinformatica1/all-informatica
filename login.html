@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALL Informática | Login</title><link rel="stylesheet" href="style.css"><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#168cff">
+<style>
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#070b10}.login-box{width:min(420px,100%);background:#11171d;border:1px solid #26313a;border-radius:16px;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.4)}.login-logo{text-align:center;margin-bottom:24px}.login-logo img{max-width:270px;width:100%}.login-box h2{margin:0 0 6px;color:#fff}.login-box p{color:#8d98a3;font-size:13px;margin:0 0 20px}.login-box .form-group{margin-bottom:14px}.login-box input{width:100%;box-sizing:border-box}.login-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.login-actions .btn{flex:1}.login-msg{margin-top:15px;padding:10px;border-radius:8px;font-size:12px;display:none}.login-help{margin-top:18px;color:#8d98a3;font-size:11px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="login-page"><div class="login-box"><div class="login-logo"><img src="logo-all.png" alt="ALL Informática"></div><h2>Entrar no sistema</h2><p>Acesse seus produtos, vendas e serviços de qualquer aparelho.</p>
+<form id="loginForm"><div class="form-group"><label>E-mail</label><input id="email" type="email" required placeholder="seu@email.com"></div><div class="form-group"><label>Senha</label><input id="senha" type="password" required minlength="6" placeholder="Sua senha"></div><div class="login-actions"><button class="btn btn-primary" type="submit">🔐 Entrar</button><button class="btn" type="button" id="btnCadastro">Criar acesso</button></div></form><div id="loginMsg" class="login-msg"></div><div class="login-help">O login é necessário para proteger os dados da loja quando o sistema estiver sincronizado na nuvem.</div></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script src="sync.js"></script>
+<script>
+const msg=document.getElementById('loginMsg');
+function mostrar(texto,ok=false){msg.textContent=texto;msg.style.display='block';msg.style.background=ok?'#123c28':'#4a1820';msg.style.color='#fff';}
+if(!ALLSync.info().configurado){mostrar('Configure o arquivo supabase-config.js com a URL e a chave do seu projeto Supabase.');}
+else{ALLSync.usuarioAtual().then(s=>{if(s) location.href='index.html';}).catch(()=>{});}
+document.getElementById('loginForm').addEventListener('submit',async e=>{e.preventDefault();try{await ALLSync.login(email.value.trim(),senha.value);mostrar('Login realizado. Abrindo o sistema...',true);setTimeout(()=>location.href='index.html',300);}catch(err){mostrar(err.message||'Não foi possível entrar.');}});
+document.getElementById('btnCadastro').addEventListener('click',async()=>{if(!ALLSync.info().configurado)return mostrar('Configure o Supabase primeiro.');try{const r=await ALLSync.cadastrarUsuario(email.value.trim(),senha.value);mostrar(r.session?'Acesso criado e login realizado.':'Acesso criado. Se o Supabase pedir confirmação de e-mail, confirme e depois entre.',true);}catch(err){mostrar(err.message||'Não foi possível criar o acesso.');}});
+</script>
+</body></html>

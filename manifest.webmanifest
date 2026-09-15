@@ -1,0 +1,11 @@
+{
+  "name": "ALL Informática",
+  "short_name": "ALL Informática",
+  "description": "Controle de estoque, vendas e serviços da ALL Informática",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#070b10",
+  "theme_color": "#168cff",
+  "lang": "pt-BR",
+  "icons": [{"src":"logo-all.png","sizes":"323x130","type":"image/png"}]
+}

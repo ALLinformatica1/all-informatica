@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALL Informática | Vendas</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.page-intro{margin-bottom:20px}.vendas-dashboard-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.venda-periodo{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.venda-periodo .btn{min-width:105px}.venda-periodo .ativo{background:#168cff;color:#fff}.venda-atalhos{display:flex;gap:10px;flex-wrap:wrap}.venda-resumo-grande{font-size:30px;font-weight:800}.vendas-empty{text-align:center;padding:35px;color:#777}.modal-venda-content{max-width:980px}.venda-itens-container{max-height:300px;overflow:auto}.venda-itens-table{width:100%;border-collapse:collapse}.venda-itens-table th,.venda-itens-table td{padding:10px;border-bottom:1px solid #252b31;text-align:left}.venda-vazia{text-align:center;color:#777;padding:25px}.venda-adicionar-produto{display:grid;grid-template-columns:1fr 110px auto;gap:10px}.btn-remover-item{border:0;background:#b4232f;color:#fff;border-radius:6px;padding:5px 9px;cursor:pointer}.total-venda{font-size:24px;font-weight:800;color:#2ecc71;padding:12px 0}.section-subtitle{color:#7f8a94;font-size:13px}.btn-whatsapp{background:#1faa59!important;color:#fff!important;border:0}.btn-success{background:#218838!important;color:#fff!important;border:0}.btn-danger{background:#b4232f!important;color:#fff!important;border:0}@media(max-width:1000px){.vendas-dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:650px){.vendas-dashboard-grid{grid-template-columns:1fr}.venda-adicionar-produto{grid-template-columns:1fr}.topbar-actions{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<button class="mobile-menu-toggle" type="button" aria-label="Abrir menu" onclick="document.body.classList.toggle('menu-mobile-aberto')">☰</button>
+<div class="mobile-menu-overlay" onclick="document.body.classList.remove('menu-mobile-aberto')"></div>
+<div class="app">
+<aside class="sidebar">
+<div class="logo"><img src="logo-all.png" alt="ALL Tecnologia | Confiança | Soluções"></div>
+<div class="menu">
+<div class="menu-title">Menu</div>
+<a class="menu-link" href="index.html">📊 Dashboard</a>
+<a class="menu-link" href="index.html#produtos">📦 Produtos</a>
+<a class="menu-link" href="vendas.html" style="background:#168cff;color:white;">🛒 Vendas</a>
+<a class="menu-link" href="servicos.html">🛠️ Serviços / OS</a>
+<a class="menu-link" href="sync.html">☁️ Sincronização</a>
+<a class="menu-link" href="vendas.html#historico">📈 Histórico de vendas</a>
+<div class="menu-title">Estoque</div>
+<a class="menu-link" href="index.html#entrada-estoque">📥 Entrada de estoque</a>
+<a class="menu-link" href="index.html#estoque-baixo">⚠️ Estoque baixo</a>
+<a class="menu-link" href="index.html#todos-produtos">📋 Todos os produtos</a>
+</div></aside>
+<main class="main">
+<div class="topbar"><div><h2>Vendas</h2><span>Controle de vendas e faturamento — ALL Informática</span></div><div class="topbar-actions"><button class="btn btn-primary" onclick="abrirNovaVenda()">🛒 Nova venda</button><a class="btn" href="index.html" style="text-decoration:none;color:white;">📦 Estoque</a></div></div>
+<section class="section page-intro">
+<div class="section-header"><div><h3>Dashboard de vendas</h3><span class="section-subtitle">Acompanhe o movimento das vendas por período.</span></div></div>
+<div class="vendas-dashboard-grid">
+<div class="card"><div class="card-title">Hoje</div><div class="card-value green" id="vendaDashboardHoje">R$ 0,00</div></div>
+<div class="card"><div class="card-title">Esta semana</div><div class="card-value blue" id="vendaDashboardSemana">R$ 0,00</div></div>
+<div class="card"><div class="card-title">Este mês</div><div class="card-value" id="vendaDashboardMes">R$ 0,00</div></div>
+<div class="card"><div class="card-title">Total histórico</div><div class="card-value blue" id="vendaDashboardTotal">R$ 0,00</div></div>
+</div>
+<div class="venda-atalhos" style="margin-top:18px;"><button class="btn btn-primary" onclick="abrirNovaVenda()">+ Registrar venda</button><a class="btn" href="index.html#produtos" style="text-decoration:none;color:white;">📦 Ir para produtos</a></div>
+</section>
+<section id="historico" class="section">
+<div class="section-header"><div><h3>Histórico de vendas</h3><span class="section-subtitle">Filtre o período e acompanhe faturamento, descontos e produtos vendidos.</span></div></div>
+<div class="historico-filtros">
+<button class="btn btn-primary filtro-venda ativo" onclick="filtrarHistoricoVendas('dia', this)">Hoje</button>
+<button class="btn filtro-venda" onclick="filtrarHistoricoVendas('semana', this)">Esta semana</button>
+<button class="btn filtro-venda" onclick="filtrarHistoricoVendas('mes', this)">Este mês</button>
+<button class="btn filtro-venda" onclick="filtrarHistoricoVendas('todas', this)">Todas</button>
+</div>
+<div class="cards historico-cards">
+<div class="card"><div class="card-title">Valor vendido</div><div class="card-value green" id="historicoTotalVendido">R$ 0,00</div></div>
+<div class="card"><div class="card-title">Faturamento bruto</div><div class="card-value blue" id="historicoFaturamentoBruto">R$ 0,00</div></div>
+<div class="card"><div class="card-title">Vendas realizadas</div><div class="card-value" id="historicoQuantidadeVendas">0</div></div>
+<div class="card"><div class="card-title">Produtos vendidos</div><div class="card-value" id="historicoQuantidadeProdutos">0</div></div>
+<div class="card"><div class="card-title">Descontos concedidos</div><div class="card-value red" id="historicoDescontos">R$ 0,00</div></div>
+</div>
+</section>
+<section class="section"><div class="section-header"><h3>Produtos vendidos no período</h3></div><div class="table-container"><table><thead><tr><th>Produto</th><th>Quantidade</th><th>Valor unitário</th><th>Total vendido</th></tr></thead><tbody id="historicoProdutosTabela"></tbody></table></div></section>
+<section class="section"><div class="section-header"><div><h3>Vendas realizadas</h3><span class="section-subtitle">As vendas aparecem de acordo com o período selecionado.</span></div><button class="btn btn-danger" type="button" onclick="limparHistoricoVendas()">🗑️ Limpar vendas</button></div><div class="table-container"><table><thead><tr><th>Data</th><th>Hora</th><th>Itens</th><th>Subtotal</th><th>Desconto</th><th>Total</th></tr></thead><tbody id="historicoVendasTabela"></tbody></table></div></section>
+</main></div>
+<div class="modal" id="modalNovaVenda"><div class="modal-content modal-venda-content"><div class="modal-header"><h3>Nova venda</h3><span class="close" onclick="fecharNovaVenda()">×</span></div><form id="formNovaVenda"><div class="form-grid"><div class="form-group full"><label>Adicionar produto</label><div class="venda-adicionar-produto"><select id="produtoVendaSelect"><option value="">Selecione um produto</option></select><input type="number" id="quantidadeProdutoVenda" min="1" value="1" placeholder="Qtd."><button type="button" class="btn btn-primary" onclick="adicionarProdutoVenda()">+ Adicionar</button></div></div><div class="form-group full"><label>Produtos da compra</label><div class="venda-itens-container"><table class="venda-itens-table"><thead><tr><th>Produto</th><th>Qtd.</th><th>Unitário</th><th>Total</th><th></th></tr></thead><tbody id="itensNovaVenda"><tr><td colspan="5" class="venda-vazia">Nenhum produto adicionado.</td></tr></tbody></table></div></div><div class="form-group"><label>Subtotal</label><input type="text" id="subtotalNovaVenda" readonly value="R$ 0,00"></div><div class="form-group"><label>Desconto (R$)</label><input type="number" id="descontoNovaVenda" min="0" step="0.01" value="0" placeholder="0,00"></div><div class="form-group full"><label>Total com desconto</label><div class="total-venda" id="totalNovaVenda">R$ 0,00</div></div></div><div class="form-footer"><button type="button" class="btn" onclick="fecharNovaVenda()">Cancelar</button><button type="submit" class="btn btn-primary">Confirmar venda</button></div></form></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="sync.js"></script>
+<script src="auth-guard.js"></script>
+<script src="script.js"></script>
+<script>
+function valorVenda(v){return Number(v?.total)||0;}
+function dataVendaObj(v){const p=String(v?.data||'').split('/'); if(p.length===3){const d=new Date(Number(p[2]),Number(p[1])-1,Number(p[0])); d.setHours(0,0,0,0); return d;} return new Date(v?.id||0);}
+function vendaNoPeriodo(v,periodo){const agora=new Date(); const d=dataVendaObj(v); agora.setHours(0,0,0,0); if(periodo==='dia') return d.getTime()===agora.getTime(); if(periodo==='semana'){const ini=new Date(agora); const dia=ini.getDay(); ini.setDate(ini.getDate()-(dia===0?6:dia-1)); return d>=ini;} if(periodo==='mes') return d.getFullYear()===agora.getFullYear()&&d.getMonth()===agora.getMonth(); return true;}
+function atualizarDashboardVendasPagina(){['dia','semana','mes'].forEach(p=>{const total=vendas.filter(v=>vendaNoPeriodo(v,p)).reduce((s,v)=>s+valorVenda(v),0); const el=document.getElementById('vendaDashboard'+(p==='dia'?'Hoje':p==='semana'?'Semana':'Mes')); if(el) el.textContent=moeda(total);}); const total=vendas.reduce((s,v)=>s+valorVenda(v),0); document.getElementById('vendaDashboardTotal').textContent=moeda(total);}
+const _renderHistoricoVendasOriginal=window.renderizarHistoricoVendas;
+window.renderizarHistoricoVendas=function(){_renderHistoricoVendasOriginal(); atualizarDashboardVendasPagina();};
+window.addEventListener('load',()=>{atualizarDashboardVendasPagina(); renderizarHistoricoVendas(); const params=new URLSearchParams(location.search); const codigo=params.get('produto'); if(codigo) setTimeout(()=>abrirNovaVenda(codigo),100);});
+</script>
+<script>
+window.addEventListener('all:sync', function(event) {
+    if (event.detail?.tipo === 'produtos') {
+        produtos = event.detail.dados || [];
+        localStorage.setItem('all_produtos', JSON.stringify(produtos));
+        atualizarDashboardVendasPagina();
+    }
+    if (event.detail?.tipo === 'vendas') {
+        vendas = event.detail.dados || [];
+        localStorage.setItem('all_vendas', JSON.stringify(vendas));
+        atualizarDashboardVendasPagina();
+        renderizarHistoricoVendas();
+    }
+});
+</script>
+<script>if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {})); }</script>
+</body></html>
