@@ -389,106 +389,107 @@ let produtos = JSON.parse(localStorage.getItem("all_produtos") || "[]");
        CADASTRAR PRODUTO
     ================================= */
 
-    document
-        .getElementById("formProduto")
-        .addEventListener(
-            "submit",
-            function(event) {
+const formProduto = document.getElementById("formProduto");
 
-                event.preventDefault();
+if (formProduto) {
+    formProduto.addEventListener(
+        "submit",
+        function(event) {
 
+            event.preventDefault();
 
-                let novoProduto = {
+            let novoProduto = {
 
-                    codigo:
+                codigo:
+                    document.getElementById(
+                        "codigo"
+                    ).value.trim(),
+
+                nome:
+                    document.getElementById(
+                        "nome"
+                    ).value.trim(),
+
+                categoria:
+                    document.getElementById(
+                        "categoria"
+                    ).value,
+
+                quantidade:
+                    Number(
                         document.getElementById(
-                            "codigo"
-                        ).value.trim(),
+                            "quantidade"
+                        ).value
+                    ),
 
-                    nome:
+                minimo:
+                    Number(
                         document.getElementById(
-                            "nome"
-                        ).value.trim(),
+                            "minimo"
+                        ).value
+                    ),
 
-                    categoria:
+                custo:
+                    Number(
                         document.getElementById(
-                            "categoria"
-                        ).value,
+                            "custo"
+                        ).value
+                    ),
 
-                    quantidade:
-                        Number(
-                            document.getElementById(
-                                "quantidade"
-                            ).value
-                        ),
-
-                    minimo:
-                        Number(
-                            document.getElementById(
-                                "minimo"
-                            ).value
-                        ),
-
-                    custo:
-                        Number(
-                            document.getElementById(
-                                "custo"
-                            ).value
-                        ),
-
-                    venda:
-                        Number(
-                            document.getElementById(
-                                "venda"
-                            ).value
-                        ),
-
-                    localizacao:
+                venda:
+                    Number(
                         document.getElementById(
-                            "localizacao"
-                        ).value.trim()
+                            "venda"
+                        ).value
+                    ),
 
-                };
+                localizacao:
+                    document.getElementById(
+                        "localizacao"
+                    ).value.trim()
 
-
-                /* Verificar código duplicado */
-
-                let existe = produtos.some(
-                    produto =>
-                        produto.codigo ===
-                        novoProduto.codigo
-                );
+            };
 
 
-                if (existe) {
+            /* Verificar código duplicado */
 
-                    alert(
-                        "Já existe um produto com esse código."
-                    );
-
-                    return;
-
-                }
+            let existe = produtos.some(
+                produto =>
+                    produto.codigo ===
+                    novoProduto.codigo
+            );
 
 
-                produtos.push(novoProduto);
-
-                salvarProdutos();
-
-                atualizarDashboard();
-
-                renderizarProdutos();
-
-                fecharModal();
-
-                this.reset();
+            if (existe) {
 
                 alert(
-                    "Produto cadastrado com sucesso!"
+                    "Já existe um produto com esse código."
                 );
 
+                return;
+
             }
-        );
+
+
+            produtos.push(novoProduto);
+
+            salvarProdutos();
+
+            atualizarDashboard();
+
+            renderizarProdutos();
+
+            fecharModal();
+
+            this.reset();
+
+            alert(
+                "Produto cadastrado com sucesso!"
+            );
+
+        }
+    );
+}
 
 
     /* =================================
