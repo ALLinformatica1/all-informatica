@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ALL Informática | Serviços e Ordens de Serviço</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.webmanifest">
-    <meta name="theme-color" content="#168cff">
     <style>
         .os-page { padding-top: 5px; }
         .os-empty {
@@ -50,24 +48,24 @@
 .services-dashboard-cards{grid-template-columns:repeat(4,minmax(0,1fr));}.os-periodo-filtros{margin:18px 0;display:flex;gap:8px;flex-wrap:wrap}.filtro-os.ativo{background:#168cff!important;color:#fff!important}@media(max-width:1000px){.services-dashboard-cards{grid-template-columns:repeat(2,minmax(0,1fr));}}@media(max-width:650px){.services-dashboard-cards{grid-template-columns:1fr;}}</style>
 </head>
 <body>
-<button class="mobile-menu-toggle" type="button" aria-label="Abrir menu" onclick="document.body.classList.toggle('menu-mobile-aberto')">☰</button>
-<div class="mobile-menu-overlay" onclick="document.body.classList.remove('menu-mobile-aberto')"></div>
 <div class="app">
     <aside class="sidebar">
-<div class="logo"><img src="logo-all.png" alt="ALL Tecnologia | Confiança | Soluções"></div>
-<div class="menu">
-<div class="menu-title">Menu</div>
-<a class="menu-link" href="index.html">📊 Dashboard</a>
-<a class="menu-link" href="index.html#produtos">📦 Produtos</a>
-<a class="menu-link" href="vendas.html">🛒 Vendas</a>
-<a class="menu-link" href="servicos.html" style="background:#168cff;color:white;">🛠️ Serviços / OS</a>
-<a class="menu-link" href="sync.html">☁️ Sincronização</a>
-<a class="menu-link" href="vendas.html#historico">📈 Histórico de vendas</a>
-<div class="menu-title">Estoque</div>
-<a class="menu-link" href="index.html#entrada-estoque">📥 Entrada de estoque</a>
-<a class="menu-link" href="index.html#estoque-baixo">⚠️ Estoque baixo</a>
-<a class="menu-link" href="index.html#todos-produtos">📋 Todos os produtos</a>
-</div></aside>
+        <div class="logo">
+            <img src="logo-all.png" alt="ALL Tecnologia | Confiança | Soluções">
+        </div>
+        <div class="menu">
+            <div class="menu-title">Menu</div>
+            <a class="menu-link" href="index.html">📊 Dashboard</a>
+            <a class="menu-link" href="index.html#produtos">📦 Produtos</a>
+            <a class="menu-link" href="vendas.html">🛒 Vendas</a>
+            <a class="menu-link" href="servicos.html" style="background:#168cff;color:white;">🛠️ Serviços / OS</a>
+            <a class="menu-link" href="vendas.html#historico">📈 Histórico de vendas</a>
+            <div class="menu-title">Estoque</div>
+            <a class="menu-link" href="index.html">📥 Entrada de estoque</a>
+            <a class="menu-link" href="index.html">⚠️ Estoque baixo</a>
+            <a class="menu-link" href="index.html">📋 Todos os produtos</a>
+        </div>
+    </aside>
 
     <main class="main">
         <div class="topbar">
@@ -267,17 +265,8 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
-<script src="sync.js"></script>
-<script src="auth-guard.js"></script>
 <script>
 let ordensServico = JSON.parse(localStorage.getItem('all_ordens_servico') || '[]');
-
-function salvarOrdensServico() {
-    localStorage.setItem('all_ordens_servico', JSON.stringify(ordensServico));
-    if (window.ALLSync) window.ALLSync.salvarOrdens(ordensServico);
-}
 
 const itensChecklistOS = [
     'Tela / Display', 'Touchscreen', 'Vidro frontal', 'Tampa traseira', 'Laterais / Moldura',
@@ -348,9 +337,61 @@ function aprovarOrcamento(numero) {
 
     os.status = 'Em andamento';
     os.orcamentoAprovadoEm = new Date().toLocaleString('pt-BR');
-    salvarOrdensServico();
+    localStorage.setItem('all_ordens_servico', JSON.stringify(ordensServico));
     renderizarOS();
     visualizarOS(os.numero);
+}
+
+function definirValorServico(numero) {
+    const os = ordensServico.find(item => String(item.numero) === String(numero));
+    if (!os) return;
+
+    if (os.tipoValor !== 'orcamento') {
+        alert('Esta OS não está configurada como orçamento.');
+        return;
+    }
+
+    if (os.status === 'Aguardando aprovação') {
+        alert('Primeiro aprove o orçamento. Depois você poderá definir o valor final do serviço.');
+        return;
+    }
+
+    if (os.status === 'Concluída') {
+        alert('Esta OS já foi concluída e não pode ter o valor alterado.');
+        return;
+    }
+
+    const valorAtual = os.valor !== '' && os.valor !== null && os.valor !== undefined
+        ? String(Number(os.valor).toFixed(2)).replace('.', ',')
+        : '';
+
+    const entrada = prompt(
+        'Informe o valor final do serviço para a OS #' + os.numero + ':',
+        valorAtual
+    );
+
+    if (entrada === null) return;
+
+    const valorTexto = String(entrada).trim().replace(/R\$/gi, '').replace(/\s/g, '');
+    let valor;
+
+    if (valorTexto.includes(',') && valorTexto.includes('.')) {
+        valor = Number(valorTexto.replace(/\./g, '').replace(',', '.'));
+    } else {
+        valor = Number(valorTexto.replace(',', '.'));
+    }
+
+    if (!Number.isFinite(valor) || valor < 0) {
+        alert('Informe um valor válido. Exemplo: 350,00');
+        return;
+    }
+
+    os.valor = valor;
+    os.valorDefinidoEm = new Date().toLocaleString('pt-BR');
+    localStorage.setItem('all_ordens_servico', JSON.stringify(ordensServico));
+    renderizarOS();
+    visualizarOS(os.numero);
+    alert('Valor do serviço salvo com sucesso: ' + moedaOS(valor));
 }
 
 function novaOS() {
@@ -401,7 +442,7 @@ function marcarServicoPronto(numero) {
     os.status = 'Pronto para retirada';
     os.dataPronto = new Date().toLocaleDateString('pt-BR');
     os.horaPronto = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
-    salvarOrdensServico();
+    localStorage.setItem('all_ordens_servico', JSON.stringify(ordensServico));
     renderizarOS();
     alert('OS #' + os.numero + ' marcada como pronta para retirada.');
 }
@@ -482,7 +523,7 @@ function chamarClienteWhatsApp(numero) {
         os.status = 'Pronto para retirada';
         os.dataPronto = new Date().toLocaleDateString('pt-BR');
         os.horaPronto = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
-        salvarOrdensServico();
+        localStorage.setItem('all_ordens_servico', JSON.stringify(ordensServico));
         renderizarOS();
     }
 
@@ -507,7 +548,7 @@ function excluirOS(numero) {
     if (!confirmar) return;
 
     ordensServico = ordensServico.filter(item => String(item.numero) !== String(numero));
-    salvarOrdensServico();
+    localStorage.setItem('all_ordens_servico', JSON.stringify(ordensServico));
     fecharVisualizarOS();
     renderizarOS();
     alert('Ordem de serviço excluída com sucesso.');
@@ -532,8 +573,9 @@ function visualizarOS(numero) {
             <div class="os-info-box"><small>IMEI / Nº de série</small><strong>${escaparHTML(os.identificacao || 'Não informado')}</strong></div>
             <div class="os-info-box"><small>Status</small><span class="status-os ${classeStatusOS(os.status)}">${escaparHTML(os.status)}</span></div>
             <div class="os-info-box"><small>Tipo de aparelho</small><strong>${escaparHTML(os.tipoAparelho || 'Não informado')}</strong></div>
-            <div class="os-info-box"><small>${os.tipoValor === 'orcamento' ? 'Orçamento' : 'Valor do serviço'}</small><strong>${os.valor !== null && os.valor !== undefined && os.valor !== '' ? moedaOS(os.valor) : 'A definir'}</strong></div>
+            <div class="os-info-box"><small>${os.tipoValor === 'orcamento' && os.orcamentoAprovadoEm ? 'Valor final do serviço' : (os.tipoValor === 'orcamento' ? 'Orçamento' : 'Valor do serviço')}</small><strong>${os.valor !== null && os.valor !== undefined && os.valor !== '' ? moedaOS(os.valor) : 'A definir'}</strong></div>
             ${os.tipoValor === 'orcamento' && os.orcamentoAprovadoEm ? `<div class="os-info-box"><small>Orçamento aprovado</small><strong>${escaparHTML(os.orcamentoAprovadoEm)}</strong></div>` : ''}
+            ${os.tipoValor === 'orcamento' && os.valorDefinidoEm ? `<div class="os-info-box"><small>Valor definido/atualizado</small><strong>${escaparHTML(os.valorDefinidoEm)}</strong></div>` : ''}
             <div class="os-info-box"><small>Entrada</small><strong>${escaparHTML(os.data || '-')} às ${escaparHTML(os.hora || '-')}</strong></div>
             ${os.dataPronto ? `<div class="os-info-box"><small>Serviço pronto</small><strong>${escaparHTML(os.dataPronto)} às ${escaparHTML(os.horaPronto || '-')}</strong></div>` : ''}
             <div class="os-info-box os-view-full"><small>Problema relatado</small><span>${escaparHTML(os.problema || '-')}</span></div>
@@ -551,6 +593,7 @@ function visualizarOS(numero) {
     const footer = document.querySelector('#modalVisualizarOS .form-footer');
     footer.innerHTML = `
         ${os.tipoValor === 'orcamento' && os.status === 'Aguardando aprovação' ? `<button type="button" class="btn btn-warning" onclick="aprovarOrcamento('${escaparHTML(os.numero)}')">✓ Aprovar orçamento</button>` : ''}
+        ${os.tipoValor === 'orcamento' && os.status !== 'Aguardando aprovação' && os.status !== 'Concluída' ? `<button type="button" class="btn btn-primary" onclick="definirValorServico('${escaparHTML(os.numero)}')">💰 ${os.valor !== null && os.valor !== undefined && os.valor !== '' ? 'Alterar valor' : 'Definir valor'}</button>` : ''}
         ${whatsapp ? `<button type="button" class="btn btn-whatsapp" onclick="enviarOSWhatsApp('${escaparHTML(os.numero)}')">📋 Enviar OS pelo WhatsApp</button>` : ''}
         ${whatsapp ? `<button type="button" class="btn btn-whatsapp" onclick="chamarClienteWhatsApp('${escaparHTML(os.numero)}')">💬 Avisar cliente</button>` : ''}
         <button type="button" class="btn btn-danger" onclick="excluirOS('${escaparHTML(os.numero)}')">🗑 Excluir OS</button>
@@ -635,7 +678,7 @@ document.getElementById('formOS').addEventListener('submit', function(e) {
     };
 
     ordensServico.unshift(os);
-    salvarOrdensServico();
+    localStorage.setItem('all_ordens_servico', JSON.stringify(ordensServico));
     this.reset();
     fecharOS();
     renderizarOS();
@@ -655,31 +698,6 @@ document.getElementById('formOS').addEventListener('submit', function(e) {
 
 montarChecklistOS();
 renderizarOS();
-
-window.addEventListener('load', function () {
-    if (!window.ALLSync) return;
-    ALLSync.init({
-        aplicar: async function (dados) {
-            // Quando a nuvem já possui dados, ela é a fonte principal.
-            // Se estiver totalmente vazia, preservamos o local para o primeiro envio.
-            if (dados.temDadosNuvem && Array.isArray(dados.ordens)) {
-                ordensServico = dados.ordens;
-                localStorage.setItem('all_ordens_servico', JSON.stringify(ordensServico));
-                renderizarOS();
-            }
-        }
-    });
-});
 </script>
-<script>
-window.addEventListener('all:sync', function(event) {
-    if (event.detail?.tipo === 'ordens') {
-        ordensServico = event.detail.dados || [];
-        localStorage.setItem('all_ordens_servico', JSON.stringify(ordensServico));
-        renderizarOS();
-    }
-});
-</script>
-<script>if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {})); }</script>
 </body>
 </html>
